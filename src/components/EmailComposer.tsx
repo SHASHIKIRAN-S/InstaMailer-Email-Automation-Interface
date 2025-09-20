@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, Clock, User, MessageSquare } from 'lucide-react';
 import type { Tone } from '../types';
+import { config } from '../config';
 
 interface EmailComposerProps {
   // ...
@@ -35,7 +36,7 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
     formData.append("tone", tone);
     formData.append("type", emailType);
 
-    const response = await fetch("http://localhost:8000/generate", {
+    const response = await fetch(config.endpoints.generate, {
       method: "POST",
       body: formData,
     });
@@ -182,12 +183,12 @@ const EmailComposer: React.FC<EmailComposerProps> = ({
                 <button
                   onClick={async () => {
                     if (draftId !== null) {
-                      await fetch(`http://localhost:8000/update_draft/${draftId}`, {
+                      await fetch(config.endpoints.update(draftId), {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ content: editableContent }),
                       });
-                      const sendResponse = await fetch(`http://localhost:8000/send/${draftId}`, {
+                        const sendResponse = await fetch(config.endpoints.send(draftId), {
                         method: "POST"
                       });
                       if (sendResponse.ok) {
