@@ -4,8 +4,17 @@ import type { Tone } from '../types';
 import { config } from '../config';
 
 interface EmailComposerProps {
-  // ...
+  onGenerate: (
+    prompt: string,
+    recipient: string,
+    tone: Tone,
+    type: 'general' | 'meeting'
+  ) => Promise<void>;
+  isGenerating: boolean;
+  generatedContent: string;
+  onSend: () => Promise<void>;
 }
+
 
 const EmailComposer: React.FC<EmailComposerProps> = ({
   // ...
