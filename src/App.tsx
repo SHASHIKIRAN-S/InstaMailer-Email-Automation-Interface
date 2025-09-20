@@ -5,6 +5,7 @@ import EmailHistory from './components/EmailHistory';
 import EmailStatsComponent from './components/EmailStats';
 import SettingsComponent from './components/Settings';
 import EmailModal from './components/EmailModal';
+import { config } from './config';
 import type { EmailDraft, EmailStats, Settings, Tone } from './types';
 
 function App() {
@@ -32,12 +33,17 @@ function App() {
 
   const fetchEmails = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/emails');
+      console.log('Fetching emails from:', config.endpoints.emails);
+      const response = await fetch(config.endpoints.emails);
+      console.log('Emails response status:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('Emails data:', data);
         setEmails(data);
       } else {
-        console.error('Failed to fetch emails');
+        console.error('Failed to fetch emails, status:', response.status);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
       }
     } catch (error) {
       console.error('Error fetching emails:', error);
@@ -46,12 +52,17 @@ function App() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/stats');
+      console.log('Fetching stats from:', config.endpoints.stats);
+      const response = await fetch(config.endpoints.stats);
+      console.log('Stats response status:', response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log('Stats data:', data);
         setStats(data);
       } else {
-        console.error('Failed to fetch stats');
+        console.error('Failed to fetch stats, status:', response.status);
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
       }
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -77,13 +88,16 @@ function App() {
     setIsGenerating(true);
     
     try {
-      const response = await fetch('http://127.0.0.1:8000/generate', {
+      console.log('Generating email from:', config.endpoints.generate);
+      console.log('Request body:', { prompt, recipient, tone, type });
+      const response = await fetch(config.endpoints.generate, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({ prompt, recipient, tone, type }),
+        body: new URLSearchParams({ prompt, recipient, tone, type }),
       });
+      console.log('Generate response status:', response.status);
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -120,7 +134,7 @@ function App() {
     if (!currentDraft || !currentDraft.id) return;
     
     try {
-      const response = await fetch(`http://127.0.0.1:8000/send/${currentDraft.id}`, {
+      const response = await fetch(config.endpoints.send(currentDraft.id), {
         method: 'POST',
       });
 
@@ -149,7 +163,7 @@ function App() {
 
   const handleDeleteEmail = async (id: number) => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/emails/${id}`, {
+      const response = await fetch(config.endpoints.delete(id), {
         method: 'DELETE',
       });
 
